@@ -4,8 +4,17 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField()
+    avatar = models.ImageField(upload_to='avatars', default='avatars/default.jpg')
+
+    def __str__(self):
+        return f"Profile of user:{self.user.username}"
+
+
 class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField(blank=False, null=False)
     created_date = models.DateTimeField(auto_now_add=True)
 
@@ -17,7 +26,7 @@ class Comment(models.Model):
         ordering = ('created_date',)
 
     def __str__(self):
-        return f'user:{self.user.username} comment'
+        return f'user:{self.user.user.username} comment'
 
 
 class PhotoPost(models.Model):
@@ -33,7 +42,7 @@ class PhotoPost(models.Model):
         (REMOVED, 'removed'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=256, blank=False, null=False)
     description = models.TextField(blank=True)
     status = models.PositiveIntegerField(choices=PostStatusChoices, default=AWAIT)
@@ -48,12 +57,12 @@ class PhotoPost(models.Model):
 
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
-    post = models.ForeignKey(PhotoPost, on_delete=models.CASCADE, related_name='whoLike')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='likes')
+    post = models.ForeignKey(PhotoPost, on_delete=models.CASCADE, related_name='likes')
 
     class Meta:
         unique_together = ('user', 'post')
 
     def __str__(self):
-        return f'user:{self.user.username} like post:{self.post.title}'
+        return f'user:{self.user.user.username} like post:{self.post.title}'
 

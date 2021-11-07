@@ -1,8 +1,13 @@
 from django.contrib import admin
 
 # Register your models here.
-from competition.models import PhotoPost, Comment, Like
+from competition.models import UserProfile, PhotoPost, Comment, Like
 
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('id', 'avatar',)
+    list_display_links = ('id', 'avatar',)
+    #search_fields = ('user.username')
 
 @admin.register(PhotoPost)
 class PhotoPostAdmin(admin.ModelAdmin):
